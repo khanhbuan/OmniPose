@@ -13,7 +13,7 @@ class LSPDataModule(LightningDataModule):
         batch_size: int = 32,
         num_workers: int = 4,
         sigma: int = 3,
-        stride: int = 8,
+        stride: int = 4,
         pin_memory: bool = False,
     ) -> None:
         super().__init__()

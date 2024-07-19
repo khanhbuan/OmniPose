@@ -79,40 +79,33 @@ def accuracy(output, target, thr_PCK, hm_type='gaussian'):
     PCK = np.zeros((len(idx)))
     avg_PCK = 0
 
-    pelvis = [(target[0,3,0] + target[0,4,0])/2, (target[0,3,1] + target[0,4,1])/2]
-    torso  = np.linalg.norm(target[0,13,:] - pelvis)
+    pelvis = [(target[0,2,0] + target[0,3,0])/2, (target[0,2,1] + target[0,3,1])/2]
+    torso  = np.linalg.norm(target[0,12,:] - pelvis)
 
     for i in range(len(idx)):
         PCK[i] = dist_acc(dists[idx[i]], thr_PCK*torso)
-        if PCK[i] >= 0:
-            avg_PCK = avg_PCK + PCK[i]  
-        else:
+        if PCK[i] < 0:
             PCK[i] = 0
-
-        avg_PCK = avg_PCK / cnt if cnt != 0 else 0
-        if cnt != 0:
-            PCK[0] = avg_PCK
 
     return PCK, visible
 
 class PCK(Metric):
     def __init__(self):
         super().__init__()
-        self.add_state("PCK", default=torch.zeros(15), dist_reduce_fx="sum")
-        self.add_state("count", default=torch.zeros(15), dist_reduce_fx="sum")
+        self.add_state("PCK", default=torch.zeros(14), dist_reduce_fx="sum")
+        self.add_state("count", default=torch.zeros(14), dist_reduce_fx="sum")
     
     def update(self, pred, target, idx):
         acc_PCK, visible = accuracy(pred, target, 0.2)
         
-        self.PCK[0] = (self.PCK[0]*idx + acc_PCK[0])/(idx + 1)
-        for j in range(1, 15):
+        for j in range(0, 14):
                 if visible[j] == 1:
                     self.PCK[j] = (self.PCK[j]*self.count[j] + acc_PCK[j])  / (self.count[j] + 1)
                     self.count[j] += 1
 
     def compute(self):
-        return self.PCK[1:].sum()/14
+        return self.PCK.sum()/14
 
     def reset(self):
-        self.PCK = torch.zeros(15)
-        self.count = torch.zeros(15)
+        self.PCK = torch.zeros(14)
+        self.count = torch.zeros(14)

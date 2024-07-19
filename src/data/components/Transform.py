@@ -41,7 +41,7 @@ def resize(img, kpt, center, ratio):
         center[0] *= ratio[1]
         center[1] *= ratio[0]
 
-    return np.ascontiguousarray(cv2.resize(img,(368, 368),interpolation=cv2.INTER_CUBIC)), kpt, center
+    return np.ascontiguousarray(cv2.resize(img,(256, 256),interpolation=cv2.INTER_CUBIC)), kpt, center
 
 class Resized(object):
     def __init__(self, size):

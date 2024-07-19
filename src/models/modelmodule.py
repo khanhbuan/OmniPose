@@ -5,7 +5,7 @@ from lightning import LightningModule
 from src.models.components.evaluate import PCK
 from torchmetrics import MaxMetric, MeanMetric
 
-class UniPoseModule(LightningModule):
+class OmniPoseModule(LightningModule):
     def __init__(
         self,
         net: torch.nn.Module,

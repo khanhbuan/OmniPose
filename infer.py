@@ -47,12 +47,12 @@ def draw_paints(im, kpts):
     cv2.imwrite('output.png', im)
 
 if __name__ == "__main__":
-    ckpt_path="/mnt/apple/k66/khanh/UniPose/logs/train/runs/2024-07-17_22-01-11/checkpoints/epoch_036.ckpt"
+    ckpt_path="./logs/train/runs/2024-07-18_10-58-30/checkpoints/epoch_060.ckpt"
     model = UniPoseModule.load_from_checkpoint(net=unipose(), checkpoint_path=ckpt_path)
     model.eval()
 
-    img_path = "./data/lsp/images/im00028.jpg"
-    # img_path = "./test.jpg"
+    # img_path = "./data/lsp/images/im00001.jpg"
+    img_path = "./test.png"
     img = cv2.resize(cv2.imread(img_path), (368, 368))
     render_img = img
     

@@ -26,28 +26,26 @@ class transformed_dataset(Dataset):
         if self.mode == "train":
             transform = Transform.Compose([
                 Transform.RandomHorizontalFlip(p=0.5),
-                Transform.Resized(368)
+                Transform.Resized(256)
             ])
         
         else:
-            transform = Transform.Resized(368)
+            transform = Transform.Resized(256)
 
         img, kpt, center = transform(img, kpt, center)
 
         height, width, _ = img.shape
         
-        heatmap = np.zeros((int(height/self.stride), int(width/self.stride), int(len(kpt)+1)), dtype=np.float32)
+        heatmap = np.zeros((int(height/self.stride), int(width/self.stride), len(kpt)), dtype=np.float32)
         for i in range(len(kpt)):
-            # resize from 368 to 46
+            # resize from 256 to 64
             x = int(kpt[i][0]) * 1.0 / self.stride
             y = int(kpt[i][1]) * 1.0 / self.stride
             heat_map = gaussian_kernel(size_h = int(height/self.stride), size_w = int(width/self.stride), 
                                        center_x = x, center_y = y, sigma = self.sigma)
             heat_map[heat_map > 1] = 1
             heat_map[heat_map < 0.0099] = 0
-            heatmap[:, :, i + 1] = heat_map
-
-        heatmap[:, :, 0] = 1.0 - np.max(heatmap[:, :, 1:], axis=2)  # for background
+            heatmap[:, :, i] = heat_map
 
         img = Transform.normalize(Transform.to_tensor(img), 
                                   [128.0, 128.0, 128.0],
