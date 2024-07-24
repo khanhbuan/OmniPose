@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Tuple
 import torch
+import albumentations as A
 from lightning import LightningDataModule
 from src.data.components.lsp import LSP_Data
 from src.data.components.transformed_dataset import transformed_dataset
@@ -10,15 +11,20 @@ class LSPDataModule(LightningDataModule):
         self,
         data_dir: str = "./data/lsp",
         train_val_test_split: Tuple[int, int, int] = (7999, 2000, 1),
-        batch_size: int = 32,
+        batch_size: int = 16,
         num_workers: int = 4,
         sigma: int = 3,
         stride: int = 4,
         pin_memory: bool = False,
+        train_transform: Optional[A.Compose] = None,
+        val_test_transform: Optional[A.Compose] = None,
     ) -> None:
         super().__init__()
 
         self.save_hyperparameters(logger=False)
+
+        self.train_transform = train_transform
+        self.val_test_transform = val_test_transform
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
@@ -43,9 +49,9 @@ class LSPDataModule(LightningDataModule):
                 lengths=self.hparams.train_val_test_split,
                 generator=torch.Generator().manual_seed(42),
             )
-            self.data_train = transformed_dataset(train, self.hparams.stride, self.hparams.sigma, mode="train")
-            self.data_val = transformed_dataset(val, self.hparams.stride, self.hparams.sigma, mode="val")
-            self.data_test = transformed_dataset(test, self.hparams.stride, self.hparams.sigma, mode="test")
+            self.data_train = transformed_dataset(train, self.hparams.stride, self.hparams.sigma, transform=self.train_transform)
+            self.data_val = transformed_dataset(val, self.hparams.stride, self.hparams.sigma, transform=self.val_test_transform)
+            self.data_test = transformed_dataset(test, self.hparams.stride, self.hparams.sigma, transform=self.val_test_transform)
 
     def train_dataloader(self) -> DataLoader[Any]:
         return DataLoader(

@@ -1,4 +1,5 @@
 _target_: src.data.datamodule.LSPDataModule
+
 data_dir: "./data/lsp"
 train_val_test_split: [7999, 2000, 1]
 batch_size: 16
@@ -6,3 +7,8 @@ num_workers: 4
 sigma: 3
 stride: 4
 pin_memory: False
+
+defaults:
+  - _self_
+  - train_transform: train_transform.yaml
+  - val_test_transform: val_test_transform.yaml
